@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Tab</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        background: #0a0a0f;
+        color: #fff;
+        font-family: 'Inter', sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+      }
+
+      /* GRID */
+      .grid {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(124, 58, 237, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(124, 58, 237, 0.04) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* PARTICLES */
+      canvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* GLOW */
+      .glow {
+        position: fixed;
+        width: 700px;
+        height: 700px;
+        border-radius: 50%;
+        background: radial-gradient(ellipse, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        width: 100%;
+        max-width: 700px;
+        padding: 0 24px;
+      }
+
+      /* CLOCK */
+      .top {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .clock {
+        font-size: 80px;
+        font-weight: 800;
+        letter-spacing: -4px;
+        color: #fff;
+        line-height: 1;
+      }
+
+      .date {
+        font-size: 12px;
+        font-weight: 400;
+        color: rgba(255,255,255,0.22);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+
+      /* SEARCH */
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 999px;
+        padding: 13px 22px;
+        transition: all 0.2s;
+        width: 100%;
+      }
+
+      .search-box:focus-within {
+        border-color: #7c3aed;
+        background: rgba(124, 58, 237, 0.07);
+        box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1),
+                    0 0 40px rgba(124, 58, 237, 0.12);
+      }
+
+      .search-box svg { opacity: 0.2; flex-shrink: 0; }
+
+      .search-box input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-size: 14px;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .search-box input::placeholder { color: rgba(255,255,255,0.15); }
+
+      /* STATS */
+      .stats {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .stat {
+        flex: 1;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        transition: all 0.2s;
+      }
+
+      .stat:hover {
+        background: rgba(124, 58, 237, 0.08);
+        border-color: rgba(124, 58, 237, 0.2);
+      }
+
+      .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.5px;
+      }
+
+      .stat-value span {
+        color: #7c3aed;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.25);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      /* RECENT SITES */
+      .section-label {
+        width: 100%;
+        font-size: 10px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.15);
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        margin-bottom: -20px;
+      }
+
+      .recents {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .recent {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .recent:hover {
+        background: rgba(124, 58, 237, 0.08);
+        border-color: rgba(124, 58, 237, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .recent-favicon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: rgba(124, 58, 237, 0.15);
+        border: 1px solid rgba(124, 58, 237, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+
+      .recent-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .recent-title {
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.7);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .recent-url {
+        font-size: 10px;
+        color: rgba(255,255,255,0.2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* SHORTCUTS */
+      .shortcuts {
+        display: flex;
+        gap: 8px;
+      }
+
+      .shortcut {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+      }
+
+      .shortcut:hover {
+        background: #7c3aed;
+        border-color: transparent;
+        color: #fff;
+        transform: translateY(-1px);
+      }
+
+      .wordmark {
+        position: fixed;
+        bottom: 16px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.25em;
+        color: rgba(255,255,255,0.05);
+        text-transform: uppercase;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid"></div>
+    <canvas id="particles"></canvas>
+    <div class="glow"></div>
+
+    <div class="content">
+      <div class="top">
+        <div class="clock" id="clock">00:00</div>
+        <div class="date" id="date"></div>
+      </div>
+
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input id="search-input" type="text" placeholder="Search or enter a URL..." autofocus />
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value" id="stat-blocked"><span>0</span></div>
+          <div class="stat-label">Trackers Blocked</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-tabs"><span>1</span></div>
+          <div class="stat-label">Open Tabs</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-sites"><span>0</span></div>
+          <div class="stat-label">Sites Visited</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value" id="stat-time"><span>0m</span></div>
+          <div class="stat-label">Session Time</div>
+        </div>
+      </div>
+
+      <div class="section-label">Recent</div>
+      <div class="recents" id="recents">
+        <div class="recent" onclick="go('https://youtube.com')">
+          <div class="recent-favicon">▶</div>
+          <div class="recent-info">
+            <div class="recent-title">YouTube</div>
+            <div class="recent-url">youtube.com</div>
+          </div>
+        </div>
+        <div class="recent" onclick="go('https://github.com')">
+          <div class="recent-favicon">⌥</div>
+          <div class="recent-info">
+            <div class="recent-title">GitHub</div>
+            <div class="recent-url">github.com</div>
+          </div>
+        </div>
+        <div class="recent" onclick="go('https://reddit.com')">
+          <div class="recent-favicon">◈</div>
+          <div class="recent-info">
+            <div class="recent-title">Reddit</div>
+            <div class="recent-url">reddit.com</div>
+          </div>
+        </div>
+        <div class="recent" onclick="go('https://x.com')">
+          <div class="recent-favicon">✕</div>
+          <div class="recent-info">
+            <div class="recent-title">X</div>
+            <div class="recent-url">x.com</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shortcuts">
+        <div class="shortcut" onclick="go('https://youtube.com')">▶ YouTube</div>
+        <div class="shortcut" onclick="go('https://github.com')">⌥ GitHub</div>
+        <div class="shortcut" onclick="go('https://reddit.com')">◈ Reddit</div>
+        <div class="shortcut" onclick="go('https://x.com')">✕ X</div>
+      </div>
+    </div>
+
+    <div class="wordmark">Surface</div>
+
+    <script>
+      // CLOCK
+      function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clock').textContent = `${h}:${m}`;
+        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        document.getElementById('date').textContent =
+          `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // SESSION TIMER
+      const sessionStart = Date.now();
+      setInterval(() => {
+        const mins = Math.floor((Date.now() - sessionStart) / 60000);
+        document.getElementById('stat-time').innerHTML = `<span>${mins}m</span>`;
+      }, 10000);
+
+      // PARTICLES
+      const canvas = document.getElementById('particles');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = Array.from({ length: 60 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.3,
+        dx: (Math.random() - 0.5) * 0.3,
+        dy: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.4 + 0.1,
+      }));
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(147, 100, 255, ${p.alpha})`;
+          ctx.fill();
+          p.x += p.dx;
+          p.y += p.dy;
+          if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+          if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        });
+
+        // draw lines between close particles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(124, 58, 237, ${0.12 * (1 - dist / 100)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(drawParticles);
+      }
+      drawParticles();
+
+      window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      // SEARCH
+      document.getElementById('search-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') go(e.target.value);
+      });
+
+      function go(url) {
+        window.parent.postMessage({ type: 'navigate', url }, '*');
+      }
+    </script>
+  </body>
+</html>

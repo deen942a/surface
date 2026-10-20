@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Surface</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="titlebar">
+      <div id="tabs">
+        <div class="tab active" data-id="1">
+          <span class="tab-title">New Tab</span>
+        </div>
+        <button id="btn-newtab">+</button>
+      </div>
+      <div id="controls">
+        <button id="btn-minimize">−</button>
+        <button id="btn-maximize">□</button>
+        <button id="btn-close">×</button>
+      </div>
+    </div>
+    <div id="navbar">
+      <button id="nav-back">←</button>
+      <button id="nav-forward">→</button>
+      <button id="nav-reload">↻</button>
+      <input id="urlbar" type="text" placeholder="Search or enter URL..." />
+    </div>
+    <div id="content">
+      <iframe id="homepage" src="home.html" frameborder="0"></iframe>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
